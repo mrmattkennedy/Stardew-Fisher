@@ -1,4 +1,4 @@
-# stardew_fisher
+# Stardew fisher
 Fishes for me in stardew valley because I am lazy.
 
 This project was made as a basic showcase of opencv image capturing and template matching.
