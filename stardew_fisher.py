@@ -69,6 +69,7 @@ class stardew_fisher:
 
         w, h = self.bar_template.shape[:-1]
         for (x, y) in zip(match_locations[1], match_locations[0]):
+            #Magic number offsets based on the fishing_bar image, so rectangles drawn at correct spot.
             cv2.rectangle(original_img, (x+550, y+24), (x+w+550, y+h+24), [0, 255, 255], 2)
         return match_locations[0][0]
 
