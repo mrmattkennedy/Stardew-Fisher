@@ -16,4 +16,4 @@ Currently, the opencv aspect is completely done in python. When I get access to 
 Current progress displayed below. This is what the algorithm sees (notice the blue boxes when the fish escapes the green bar. These are to identify the position of the fish, and the position of the bar.)
 ![Image of Idea](https://github.com/mrmattkennedy/stardew_fisher/blob/master/what_algorithm_sees.gif)
 
-(I know this gif has about 1 frame per second. This is because it was not meant to do image analysis and run steam games simultaneously).
+(I know this gif has about 1 frame per second. This is because this laptop was not meant to do image analysis and run steam games simultaneously).
