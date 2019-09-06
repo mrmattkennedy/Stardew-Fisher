@@ -11,7 +11,7 @@ The basic idea is shown in the picture below: keep the fish icon in the green ba
 ![Image of Idea](https://github.com/mrmattkennedy/stardew_fisher/blob/master/video%20screenshots/20.jpg)
 
 So I set off to create this incredible AI to change the world, with my limited resources.
-Currently, the opencv aspect is completely done in python. When I get access to the world again, I'll remake this in .NET with opencv, and work on a q-learning algorithm to try and make this smarter.
+Currently, the opencv aspect is completely done in python. When I get access to the world again, I'll remake this in .NET with opencv, and work on a q-learning algorithm to try and make this smarter. Reason for q-learning is that this is a tricky learning curve, even if the problem is simple: pressing the mouse slowly moves the bar faster and faster, there is momentum and gravity to consider, so I believe a reinforced learning method would be best to let the algorithm figure it out "for itself".
 
 Current progress displayed below. This is what the algorithm sees (notice the blue boxes when the fish escapes the green bar. These are to identify the position of the fish, and the position of the bar.)
 ![Image of Idea](https://github.com/mrmattkennedy/stardew_fisher/blob/master/what_algorithm_sees.gif)
