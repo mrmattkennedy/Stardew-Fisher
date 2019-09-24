@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace WindowsFormsApplication1
+namespace Stardew_Fisher_DotNet
 {
     public partial class Form1 : Form
     {
@@ -18,6 +18,7 @@ namespace WindowsFormsApplication1
         private delegate void SafePictureDelegate(Bitmap capture);
         private Thread thread2 = null;
         private int count = 0;
+        private System.Windows.Forms.Timer timer1;
 
         public Form1()
         {
@@ -27,13 +28,12 @@ namespace WindowsFormsApplication1
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
+
         }
 
-        private void captureBtn_click(object sender, EventArgs e)
+        private void timer1_Tick(object sender, EventArgs e)
         {
-            CaptureScreen();
-            
+            count = 0;
         }
 
         private void CaptureScreen()
@@ -62,11 +62,11 @@ namespace WindowsFormsApplication1
                 {
                     MessageBox.Show(ex.Message);
                 }
-                
+
             }
         }
 
-        private void setLabelValue (string value)
+        private void setLabelValue(string value)
         {
             if (this.label1.InvokeRequired)
             {
@@ -89,24 +89,20 @@ namespace WindowsFormsApplication1
             else
             {
                 captureBox.Image = capture;
+                captureBox.Image.Dispose();
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void startBtn_Click_1(object sender, EventArgs e)
         {
+            timer1 = new System.Windows.Forms.Timer();
+            timer1.Tick += new EventHandler(timer1_Tick);
+            timer1.Interval = 1000; // 1 second
+            timer1.Start();
+
             captureBox.Size = new Size(1024, 768);
             thread2 = new Thread(new ThreadStart(CaptureScreen));
             thread2.Start();
-        }
-
-        private void captureBox_Click(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }
