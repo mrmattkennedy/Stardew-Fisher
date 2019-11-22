@@ -1,0 +1,25 @@
+Observation space is the info taken in
+In frozen lake 8x8, there are 64 spaces, with 4 actions (up, down, left, right)
+For stardew fisher: 
+	Observations:
+		Location of fish
+			Distance to top
+			Distance to bottom
+		Location of bar
+			Distance to top
+			Distance to bottom
+		Difference in location
+
+	Actions:
+		Hold mouse
+		Continue to hold
+		Stop holding
+		Do nothing
+		
+Q: array of [states][actions][probability, nextstate, reward, done]
+isd is map into an array
+
+
+self.observation_space = spaces.Discrete(self.nS), so the number of states = number of observations
+States: frozen lake is map
+Stardew: 
