@@ -1,1 +1,1 @@
-from stardew_fisher.envs.stardew_fisher import StardewFisher
+from stardew_fisher.envs.stardew_fisher_env import StardewFisherEnv

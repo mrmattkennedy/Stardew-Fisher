@@ -5,8 +5,7 @@ env = gym.make('FrozenLake8x8-v0')
 Q = np.zeros([env.observation_space.n,env.action_space.n])
 print(env.observation_space.n)
 print(env.action_space.n)
-for item in env.isd:
-    print(item)
+
 # env.obeservation.n, env.action_space.n gives number of states and action in env loaded
 # 2. Parameters of Q-leanring
 eta = .628
@@ -39,3 +38,5 @@ for i in range(epis):
 #print "Reward Sum on all episodes " + str(sum(rev_list)/epis)
 #print "Final Values Q-Table"
 print(Q)
+for item in env.isd:
+    print(item)
