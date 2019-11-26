@@ -41,6 +41,8 @@ li = (probability, nextstate, reward, done)...
 		
 For stardew fisher:
 observation, reward, done, info
+
+height is roughly 35 to 320
 return the observations, the current reward, done or not, any extra info
 
 
