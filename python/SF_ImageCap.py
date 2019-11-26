@@ -1,5 +1,6 @@
 import time
 import cv2
+import sys
 import numpy as np
 from PIL import ImageGrab
 from pynput.mouse import Button, Controller
@@ -12,12 +13,13 @@ Done using opencv
 """
 class stardew_fisher:
     def __init__(self):
+        self.local_path = sys.path[0]
         #Mouse used for pressing mouse to adjust the bar
         self.mouse = Controller()
         #Used to find the image of the fish on the screen
-        self.fish_template = cv2.imread('images/fish.jpg')
+        self.fish_template = cv2.imread(self.local_path[:self.local_path.rfind('\\')] + '\\images\\fish_template_home.png')
         #Used to find the image of the bar on the screen
-        self.bar_template = cv2.imread('images/small_bar.jpg')
+        self.bar_template = cv2.imread(self.local_path[:self.local_path.rfind('\\')] + '\\images\\small_bar.jpg')
 
         #Begins capturing the screen
         self.capture_screen()    
@@ -26,6 +28,8 @@ class stardew_fisher:
     #Once fish is found, send coordinates
     def locate_fish(self, original_img):
         img=cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB)
+        #cv2.imshow('',self.fish_template)
+        #exit()
 
         #See if the fish matches anywhere. Most accurate results with TM_SQDIFF_NORMED alg.
         res = cv2.matchTemplate(img, self.fish_template, cv2.TM_SQDIFF_NORMED)
@@ -56,15 +60,17 @@ class stardew_fisher:
         #Just gets the image of the bar. Main idea was, instead of
         #trying to match a simple rectangle on the entire frame, limit
         #threshold to just the bar. The only square is the bar, so easy to find.
-        fishing_bar = original_img[10:360, 573:597]
+        fishing_bar = original_img[10:400, 523:565]
         #edges = cv2.Canny(fishing_bar,100,200) #thought about using edges, not the best idea.
         #cv2.imshow('', edges)
         
         img=cv2.cvtColor(fishing_bar, cv2.COLOR_BGR2RGB)
+        #cv2.imshow('',img)
+        #exit()
 
         res = cv2.matchTemplate(img, self.bar_template, cv2.TM_SQDIFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        min_thresh = (min_val + 1e-6) * 1.2
+        min_thresh = (min_val + 1e-6) * 10
         match_locations = np.where(res <=min_thresh)
 
         w, h = self.bar_template.shape[:-1]
@@ -99,15 +105,15 @@ class stardew_fisher:
     def capture_screen(self):
         
         while True:
-            screen = np.array(ImageGrab.grab(bbox=(40, 62, 900, 520))) #capture the window (wrote script to resize window)
+            screen = np.array(ImageGrab.grab(bbox=(40, 42, 900, 520))) #capture the window (wrote script to resize window)
             fish_location = self.locate_fish(screen) #get the location of the fish
             bar_location = self.locate_bar(screen, fish_location) #if fish found, that means fish is not being caught
             if (fish_location is not None):
-                self.move_bar(fish_location, bar_location)
+                print(fish_location, bar_location)
                 
-            #cv2.imshow('', screen) #see what this program sees
+            cv2.imshow('', cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)) #see what this program sees
             #cv2.imwrite('video screenshots/' + str(num) + '.jpg', cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)) #used for saving to use in video
-            num += 1
+           # num += 1
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 cv2.destroyAllWindows()
                 break
