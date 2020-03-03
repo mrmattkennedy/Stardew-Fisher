@@ -47,5 +47,18 @@ return the observations, the current reward, done or not, any extra info
 
 
 
+greatest time and smallest diff is greatest reward
+greatest time and greatest diff is smallest reward
+
+diff > 10, reward is negative
+if diff < 10:
+	reward = time * 10-diff
+else:
+	reward = -(time * diff)
+
+-800 to 80, 100 for catching fish
+
+
+
 
 
