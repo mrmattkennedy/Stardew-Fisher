@@ -1,5 +1,6 @@
 import time
 import cv2
+import pdb
 import sys
 import numpy as np
 from PIL import ImageGrab
@@ -70,7 +71,7 @@ class stardew_fisher:
 
         res = cv2.matchTemplate(img, self.bar_template, cv2.TM_SQDIFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-        min_thresh = (min_val + 1e-6) * 10
+        min_thresh = (min_val + 1e-6) * 7
         match_locations = np.where(res <=min_thresh)
 
         w, h = self.bar_template.shape[:-1]
@@ -103,19 +104,29 @@ class stardew_fisher:
             self.mouse.release(Button.left)
         
     def capture_screen(self):
-        
+        num = 0
+        arr = None
+        time.sleep(1)
         while True:
-            screen = np.array(ImageGrab.grab(bbox=(40, 42, 900, 520))) #capture the window (wrote script to resize window)
-            fish_location = self.locate_fish(screen) #get the location of the fish
-            bar_location = self.locate_bar(screen, fish_location) #if fish found, that means fish is not being caught
-            if (fish_location is not None):
-                print(fish_location, bar_location)
-                
-            cv2.imshow('', cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)) #see what this program sees
-            #cv2.imwrite('video screenshots/' + str(num) + '.jpg', cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)) #used for saving to use in video
-           # num += 1
+            box_dims = (800, 370, 840, 920)
+            screen = np.array(ImageGrab.grab(bbox=box_dims)) #capture the window (wrote script to resize window)
+            screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
+            cv2.imshow('', screen) #see what this program sees
+            if arr is None:
+                arr = screen
+            elif len(arr.shape) == 2:
+                arr = np.stack((arr, screen), axis=0)
+            else:
+                arr = np.vstack((arr, screen[None]))
+            num+=1
+            cv2.imwrite('data/' + str(num) + '.jpg', screen)
+            #time.sleep(0.5)
+            print(num)
+            if num == 100:
+                np.save("train_imgs", arr)
+                break
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 cv2.destroyAllWindows()
                 break
-        
+            
 stardew_fisher() 

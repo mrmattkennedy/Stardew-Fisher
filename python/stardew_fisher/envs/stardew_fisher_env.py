@@ -33,6 +33,8 @@ class StardewFisherEnv(gym.Env):
         self.current_time = None
         self.time_elapsed = None
         self.max_time = 8 #max time is 8 seconds to catch the fish
+        self.min_fish_loc = 25 #top
+        self.max_fish_loc = 350 #bottom
 
     def step(self, action):
         """

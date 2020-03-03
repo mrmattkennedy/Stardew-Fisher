@@ -1,8 +1,9 @@
-import gym
+#import gym
 import time
-from gym import error, spaces
-import stardew_fisher
+#from gym import error, spaces
+#import stardew_fisher
 import numpy as np
+import cv2
 
 def test():
     return 3, 4
@@ -20,7 +21,13 @@ Send in to step function, and do the option with the
 #print(spaces_total.sample())
 #print(t)
 #spaces.Discrete(i) for i in )
-t = None
-print(str(t is None))
-
-env = gym.make('StardewFisherEnv-v0')
+#t = None
+#print(str(t is None))
+#im = cv2.imread('fish.jpg')
+#im_g = cv2.cvtColor(im, cv2.COLOR_RGB2GRAY)
+#print(type(im))
+#print(im_g[0])
+#cv2.imshow('', im_g)
+#env = gym.make('StardewFisherEnv-v0')
+temp = np.load('train_imgs.npy')
+print(temp[0][450])
