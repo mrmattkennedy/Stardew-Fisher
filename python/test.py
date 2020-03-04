@@ -5,11 +5,11 @@ import time
 import numpy as np
 import cv2
 
-env = gym.make('StardewFisherEnv-v0')
+#env = gym.make('StardewFisherEnv-v0')
 
-eta = .628  #learning rate
-gma = .9    #value placed on future rewards
-epis = 5000 #epochs
+#eta = .628  #learning rate
+#gma = .9    #value placed on future rewards
+#epis = 5000 #epochs
 
 """
 OpenCV aspect will continue to read where the positions of the fish and bar are.
@@ -30,9 +30,15 @@ Send in to step function, and do the option with the
 #print(im_g[0])
 #cv2.imshow('', im_g)
 #env = gym.make('StardewFisherEnv-v0')
-temp = np.load('train_imgs.npy')
-print(temp[0][450])
-
+#temp = np.load('train_imgs.npy')
+#for i in range(430, 445):
+#    print(i)
+#    print(temp[0][i])
+#arr = np.array([401, 393, 389, 384, 382, 379, 375, 373, 371, 369, 367, 372, 375, 375, 375, 375, 374, 373, 363, 353, 342, 331, 322, 314, 305, 398, 298, 290, 283, 279])
+#np.save("labels", arr)
+temp = np.load('labels.npy')
+print(temp.shape)
+"""
 Q = np.zeros([len(env.observation_space),env.action_space.n])
 q = [[1,2,3,4],[5,6,7,8]]
 #1, in a 2D array gets the second element in every sublist
@@ -59,3 +65,4 @@ def train():
             if done:
                 break
         rev_list.append(rAll)
+"""
