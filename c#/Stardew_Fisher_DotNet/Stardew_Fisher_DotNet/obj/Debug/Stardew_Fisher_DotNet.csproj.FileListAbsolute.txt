@@ -1,9 +1,0 @@
-C:\Users\Matt\Documents\stardew_fisher\c#\Stardew_Fisher_DotNet\Stardew_Fisher_DotNet\bin\Debug\Stardew_Fisher_DotNet.exe.config
-C:\Users\Matt\Documents\stardew_fisher\c#\Stardew_Fisher_DotNet\Stardew_Fisher_DotNet\obj\Debug\Stardew_Fisher_DotNet.csprojResolveAssemblyReference.cache
-C:\Users\Matt\Documents\stardew_fisher\c#\Stardew_Fisher_DotNet\Stardew_Fisher_DotNet\obj\Debug\Stardew_Fisher_DotNet.Properties.Resources.resources
-C:\Users\Matt\Documents\stardew_fisher\c#\Stardew_Fisher_DotNet\Stardew_Fisher_DotNet\obj\Debug\Stardew_Fisher_DotNet.csproj.GenerateResource.Cache
-C:\Users\Matt\Documents\stardew_fisher\c#\Stardew_Fisher_DotNet\Stardew_Fisher_DotNet\bin\Debug\Stardew_Fisher_DotNet.exe
-C:\Users\Matt\Documents\stardew_fisher\c#\Stardew_Fisher_DotNet\Stardew_Fisher_DotNet\bin\Debug\Stardew_Fisher_DotNet.pdb
-C:\Users\Matt\Documents\stardew_fisher\c#\Stardew_Fisher_DotNet\Stardew_Fisher_DotNet\obj\Debug\Stardew_Fisher_DotNet.Form1.resources
-C:\Users\Matt\Documents\stardew_fisher\c#\Stardew_Fisher_DotNet\Stardew_Fisher_DotNet\obj\Debug\Stardew_Fisher_DotNet.exe
-C:\Users\Matt\Documents\stardew_fisher\c#\Stardew_Fisher_DotNet\Stardew_Fisher_DotNet\obj\Debug\Stardew_Fisher_DotNet.pdb
