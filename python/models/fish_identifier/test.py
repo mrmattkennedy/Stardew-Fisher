@@ -37,18 +37,20 @@ def init_params():
 
 def init_data():
     train_data = np.load('train_imgs.npy')
-    labels_data = np.load('labels.npy')
-    predictions = np.array([cv2.imread('data\\51.jpg', cv2.IMREAD_GRAYSCALE),
-                            cv2.imread('data\\52.jpg', cv2.IMREAD_GRAYSCALE),
-                            cv2.imread('data\\53.jpg', cv2.IMREAD_GRAYSCALE),
-                            cv2.imread('data\\54.jpg', cv2.IMREAD_GRAYSCALE),
-                            cv2.imread('data\\55.jpg', cv2.IMREAD_GRAYSCALE)])
+    labels_data = np.load('labels.npy',)
     
-    rows = train_data.shape[1]
-    train_data = train_data.reshape((train_data.shape[0], train_data.shape[1] * train_data.shape[2]))
-    predictions = predictions.reshape((predictions.shape[0], predictions.shape[1] * predictions.shape[2]))
+    
+    predictions = np.array([cv2.imread('data\\51.jpg'),
+                            cv2.imread('data\\52.jpg'),
+                            cv2.imread('data\\53.jpg'),
+                            cv2.imread('data\\54.jpg'),
+                            cv2.imread('data\\55.jpg')])
 
-    return train_data[:50], labels_data, predictions
+    rows = train_data.shape[1]
+    train_data = train_data.reshape((train_data.shape[0], train_data.shape[1] * train_data.shape[2] * train_data.shape[3]))
+    predictions = predictions.reshape((predictions.shape[0], predictions.shape[1] * predictions.shape[2] * predictions.shape[3]))
+    
+    return train_data[:50], labels_data, predictions, rows
 
 def init_weights(arch):
     weights = {
