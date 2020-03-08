@@ -14,11 +14,11 @@ def init_data():
     #exit
     train_data = np.load('train_imgs.npy')
     labels_data = np.load('fish_labels.npy',)
-    edges = cv2.Canny(train_data[7], 200, 300)
-    pdb.set_trace()
+    #edges = cv2.Canny(train_data[7], 200, 300)
+    #pdb.set_trace()
     #62,64
     #pdb.set_trace()
-    cv2.imshow('', edges)
+    #cv2.imshow('', edges)
     
     predictions = np.array([cv2.imread('data\\171.jpg'),
                         cv2.imread('data\\172.jpg'),
@@ -54,12 +54,30 @@ def init_data():
     rows = train_data.shape[1]    
     return train_data[:170], labels_data, predictions, rows
 
+
+
 def new_labels():
     #pdb.set_trace()
     label_data = [list(map(int, line.rstrip('\n').split(',')[1:])) for line in open('data/fish_labels.txt', 'r')]
     label_data = np.array(label_data)
     np.save('fish_labels.npy', label_data)
-    
+
+
+def locate_fish(screen):
+    in_range = 27
+    screen = np.mean(screen, axis=2)
+    #Reshape inputs
+    new_x = list()
+    for row in range(screen.shape[0] - 27):
+        temp = screen[row:row+in_range]
+        new_x.append(temp.reshape(temp.shape[0] * temp.shape[1]))
+
+    #pdb.set_trace()  
+    screen = np.array(new_x)
+    fish_row = model.predict(screen)
+    return np.argmax(fish_row)
+
+
 def train():
     flag = 3
     X, y, predictions, rows = init_data()
@@ -71,7 +89,7 @@ def train():
         model.add(Dense(600, input_shape=(X.shape[1],), activation='sigmoid'))
         model.add(Dense(1, activation='sigmoid'))
         model.compile(loss='mean_squared_error', optimizer='Adadelta', metrics=['accuracy'])
-        model.fit(X, y, epochs=5, batch_size=2000, verbose=1)
+        model.fit(X, y, epochs=1, batch_size=1, verbose=0)
         #model.save('fish_id.h5')
     else:
         model = load_model('fish_id.h5')
@@ -85,7 +103,7 @@ def train():
         preds = preds.reshape(int(preds.shape[0] / 523), 523)
     print(np.argmax(preds, axis=1))
     print(time.time() - start)
-    #pdb.set_trace()
+    pdb.set_trace()
     
 def reshape_data(X, y, predictions, rows, flag=0):
     """
@@ -186,4 +204,5 @@ def reshape_data(X, y, predictions, rows, flag=0):
         new_preds = np.array(new_preds)
         predictions = new_preds
         return X, y, predictions
-train()
+#train()
+model = load_model('batch100_fish_id.h5', compile=False)
