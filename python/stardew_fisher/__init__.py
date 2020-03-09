@@ -7,6 +7,6 @@ register(
     id='StardewFisherEnv-v0',
     entry_point='stardew_fisher.envs:StardewFisherEnv',
     #timestep_limit=1000,
-    reward_threshold=1.0,
+    reward_threshold=50000.0,
     nondeterministic = True,
 )

@@ -1,3 +1,4 @@
+import os
 import cv2
 import sys
 import pdb
@@ -8,6 +9,7 @@ import gym
 from gym import error, spaces
 from gym.utils import seeding
 from gym.envs.toy_text import discrete
+from pynput.mouse import Controller
 from PIL import ImageGrab
 
 if __name__ == '__main__':
@@ -18,24 +20,21 @@ import object_finder
 #Action space
 actions = {
     "START_HOLD" : 0,
-    "CONTINUE_HOLD" : 1,
+    "NOTHING" : 1,
     "STOP_HOLD" : 2,
-    "NOTHING" : 3
 }
 
 class StardewFisherEnv(gym.Env):
     def __init__(self):
-        #pdb.set_trace()
-        #self.observation_space = spaces.Tuple(tuple(spaces.Discrete(observations[key]) for key in observations))
-        self.observation_space = spaces.Tuple((
-            spaces.Discrete(515+1),
-            spaces.Discrete(515+1)))
+        self.mouse = Controller()
+        #Can be anywhere from fish at top, bar at bottom, to vice versa.
+        self.top = 20
+        self.bottom = 515
+        self.observation_space = spaces.Discrete((self.bottom*2)+1)
         self.action_space = spaces.Discrete(len(actions))
 
         #Variables related to location and determining if fish being caught
         self.catching = True
-        self.top = 20
-        self.bottom = 515
         self.bar_location = self.bottom
         self.fish_location = self.bottom
 
@@ -47,18 +46,59 @@ class StardewFisherEnv(gym.Env):
         self.max_diff = self.bottom - self.top
 
         #cv2/obj locater vars
+        self.show_screen = True
         self.finder = object_finder.object_finder(load_model_path='models\\batch100_fish_id.h5')
-        self.screen_dims = (800, 305, 840, 855)
         self.fish_start_col = 3
         self.fish_end_col = 38
         self.bar_start_col = 1
         self.bar_end_col = 40
         self.bar_height = 158
         self.catch_range = self.bar_height / 2
-
         
+        if not os.path.isfile('models\\numpy_data\\screen_dims.npy'):
+            self.get_screen_dims()
+            
+        self.screen_dims = np.load('models\\numpy_data\\screen_dims.npy').tolist()
+        #(800, 305, 840, 855)
+
+    def get_screen_dims(self):
+        cv2.imshow('', cv2.imread('models\\image_data\\1.jpg'))
+        x_diff = 40
+        y_diff = 550
+        done = False
+
+        while not done:
+            inp = input("Need to get dimensions for where to look for fish. Set zoom to 95%.\nHead to your fishing spot, get a fish to pop up, alt-tab out,\nand then try entering an x,y coordinate for the top left corner of the fishing area (see example).\nWhen done, hit enter in this window to see the capture area.\n")
+            try:
+                start_coord = list(map(int, inp.rstrip('\n').replace(' ', '').split(',')))
+                dims = (start_coord[0], start_coord[1], start_coord[0]+x_diff, start_coord[1]+y_diff)
+                screen = np.array(ImageGrab.grab(bbox=dims)) 
+                screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
+                cv2.imshow('', screen)
+
+                print("Left: {}, Top: {}, Right: {}, Bottom: {}".format(dims[0], dims[1], dims[2], dims[3]))
+                inp = input("Is this a good capture? Should show only fishing bar.\n1 is yes.\n2 is no.\n3 is no, show example image again.\n")
+                if inp == '1':
+                    done = True
+                if inp == '3':
+                    cv2.imshow('', cv2.imread('models\\image_data\\1.jpg'))                    
+            except:
+                print('Input not correct. Try again')
+
+        dims = np.array(dims)
+        np.save('models\\numpy_data\\screen_dims.npy', dims)
+
+                
     def step(self, action):
         assert self.action_space.contains(action)
+        #Do action
+        if action == 0:
+            self.mouse.press(Button.left)
+        elif action == 1:
+            pass
+        elif action == 2:
+            self.mouse.release(Button.left)
+            
         #Get current locations
         self._get_obs()
         """
@@ -83,7 +123,7 @@ class StardewFisherEnv(gym.Env):
         self.catching = True
         self.start_time = time.time()
         self.elapsed_time = 0
-        return (self.fish_location, int(self.bar_location))
+        return self._get_difference()
 
     def _get_obs(self):
         #capture the window (wrote script to resize window)
@@ -92,17 +132,18 @@ class StardewFisherEnv(gym.Env):
         fish_row = self.finder.locate_fish(screen)
         bar_rows = self.finder.locate_bar(screen)
 
-        #Draw rect around fish
-        cv2.rectangle(screen,
-                      (self.fish_start_col, fish_row),
-                      (self.fish_end_col, fish_row+27), [0, 255, 255], 1)
-        #Draw rect around bar
-        cv2.rectangle(screen,
-                      (self.bar_start_col, bar_rows[0]),
-                      (self.bar_end_col, bar_rows[1]), [255, 255, 0], 1)
-
+        if self.show_screen:
+            #Draw rect around fish
+            cv2.rectangle(screen,
+                          (self.fish_start_col, fish_row),
+                          (self.fish_end_col, fish_row+27), [0, 255, 255], 1)
+            #Draw rect around bar
+            cv2.rectangle(screen,
+                          (self.bar_start_col, bar_rows[0]),
+                          (self.bar_end_col, bar_rows[1]), [255, 255, 0], 1)
+            cv2.imshow('', screen)
         #Return roughly middle of bar
-        return (self.fish_location, int(self.bar_location + (self.bar_height / 2)))
+        return self._get_difference()
 
     def _update_time(self):
         if math.abs(self._get_difference()) > self.catch_range:
@@ -128,8 +169,7 @@ class StardewFisherEnv(gym.Env):
 
     #Get difference in two locations
     def _get_difference(self):
-        values = self._get_obs()
-        return values[1] - values[0]
+        return self.fish_location - int(self.bar_location + (self.bar_height / 2))
 
     #Get current reward
     def _get_reward(self):

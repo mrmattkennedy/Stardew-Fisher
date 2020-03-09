@@ -1,1 +1,4 @@
+pynput
 gym
+keras
+tensorflow==1.14
