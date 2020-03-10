@@ -1,0 +1,17 @@
+TODO:
+Base everything off monitor resolution.
+
+Portability flow:
+	Get window location and size.
+	Program casts and waits
+		While waiting, compare differences in screens (do so as percents).
+		If large diff (size=?), look for color of fishing bar wood.
+	Get bar size. if 400x30 instead of 550x40, ask to retrain model.
+		Resize train images to be same relative size as window / fishing bar.
+		Retrain model.
+	
+	Find bar based off model bitmask - Just change width of 1's relative to size.
+	Run Q learning.
+
+	
+	

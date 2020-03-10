@@ -23,12 +23,13 @@ def train():
         done = False
         j = 0
         
-        while j < 2000: #give 2000 frames to catch a fish
+        while j < 100: #give 2000 frames to catch a fish
             j+=1
             # Choose action from Q table. Less random in later iterations
             act = np.argmax(Q[diff] + np.random.randn(1,env.action_space.n)*(1./(i+1)))
             #Step with current action
             diff1,rew,done,_ = env.step(act)
+            print(j, rew, act, diff1)
             #Update current obs,state in Q table.
             #np.max(Q[diff1]) - Q[diff][act] is the difference in states.
             Q[diff][act] = Q[diff][act] + eta*(rew + gma*np.max(Q[diff1]) - Q[diff][act])
@@ -38,4 +39,4 @@ def train():
 
 #def fish():
 train()
-pdb.set_trace()
+#pdb.set_trace()

@@ -2,14 +2,13 @@ import os
 import cv2
 import sys
 import pdb
-import math
 import time
 import numpy as np
 import gym
 from gym import error, spaces
 from gym.utils import seeding
 from gym.envs.toy_text import discrete
-from pynput.mouse import Controller
+from pynput.mouse import Button, Controller
 from PIL import ImageGrab
 
 if __name__ == '__main__':
@@ -35,7 +34,7 @@ class StardewFisherEnv(gym.Env):
 
         #Variables related to location and determining if fish being caught
         self.catching = True
-        self.bar_location = self.bottom
+        self.bar_location = (self.bottom - 158, self.bottom - (158 / 2))
         self.fish_location = self.bottom
 
         #Variables related to timer
@@ -105,7 +104,8 @@ class StardewFisherEnv(gym.Env):
         TODO:
         Fix caught condition
         """
-        if self.fish_location > 330 or self.fish_location < 40: #fish caught
+        if self.fish_location > 550 or self.fish_location < 10: #fish caught
+            print(self.fish_location)
             done = True
             reward = 50000
         else: #fish is somewhere
@@ -118,7 +118,7 @@ class StardewFisherEnv(gym.Env):
         return self._get_obs(), reward, done, {}
 
     def reset(self):
-        self.bar_location = self.bottom - (self.bar_height / 2)
+        self.bar_location = (self.bottom - self.bar_height, self.bottom - (self.bar_height / 2))
         self.fish_location = self.bottom
         self.catching = True
         self.start_time = time.time()
@@ -129,24 +129,26 @@ class StardewFisherEnv(gym.Env):
         #capture the window (wrote script to resize window)
         screen = np.array(ImageGrab.grab(bbox=self.screen_dims)) 
         screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
-        fish_row = self.finder.locate_fish(screen)
-        bar_rows = self.finder.locate_bar(screen)
+        self.fish_location = self.finder.locate_fish(screen)
+        self.bar_location = self.finder.locate_bar(screen)
 
         if self.show_screen:
             #Draw rect around fish
             cv2.rectangle(screen,
-                          (self.fish_start_col, fish_row),
-                          (self.fish_end_col, fish_row+27), [0, 255, 255], 1)
+                          (self.fish_start_col, self.fish_location),
+                          (self.fish_end_col, self.fish_location+27), [0, 255, 255], 1)
             #Draw rect around bar
             cv2.rectangle(screen,
-                          (self.bar_start_col, bar_rows[0]),
-                          (self.bar_end_col, bar_rows[1]), [255, 255, 0], 1)
+                          (self.bar_start_col, self.bar_location[0]),
+                          (self.bar_end_col, self.bar_location[1]), [255, 255, 0], 1)
             cv2.imshow('', screen)
+        
         #Return roughly middle of bar
         return self._get_difference()
 
     def _update_time(self):
-        if math.abs(self._get_difference()) > self.catch_range:
+        #pdb.set_trace()
+        if abs(self._get_difference()) > self.catch_range:
             #If was catching and now not, reset timers
             if self.catching:
                 self.catching = False
@@ -165,13 +167,13 @@ class StardewFisherEnv(gym.Env):
                 
     #If fish is out of range, reset the timer
     def _check_elapsed(self):
-        return time.time() - self.start_time()
+        return time.time() - self.start_time
 
     #Get difference in two locations
     def _get_difference(self):
-        return self.fish_location - int(self.bar_location + (self.bar_height / 2))
+        return self.fish_location - int(self.bar_location[0] + (self.bar_height / 2))
 
     #Get current reward
     def _get_reward(self):
         reward_factor = 1 if self.catching == True else -1
-        return self.time_elapsed * reward_factor
+        return self.elapsed_time * reward_factor

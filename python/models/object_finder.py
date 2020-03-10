@@ -1,5 +1,6 @@
 import cv2
 import pdb
+import math
 import time
 import os.path
 import numpy as np
@@ -24,6 +25,7 @@ class object_finder:
         self.bar_block_size = 158
         self.bar_max_top = 385
         self.bar_offset = 5
+        self.last_bar_data = None
         
     def new_labels(self):
         fish_data_path = 'data\\fish_labels.txt'
@@ -72,22 +74,31 @@ class object_finder:
 
 
     def locate_bar(self, screen):
-        edges = cv2.Canny(screen, 100, 200)
+        edges = cv2.Canny(screen, 100, 200)       
         edges  = edges / 255
         col_start = 10
         col_end = 30
         mask = np.ones(col_end-col_start)
 
-        for row in range(8, 520):
+        for row in range(12, 520):
             if np.array_equal(edges[row,col_start:col_end], mask):
                 #pdb.set_trace()
                 #Found bar bottom
                 if row > self.bar_max_top:
+                    if self.last_bar_data is not None and abs(self.last_bar_data[0] - (row-self.bar_block_size+self.bar_offset)) > 130:
+                        return self.last_bar_data
+
+                    self.last_bar_data = (row-self.bar_block_size+self.bar_offset), row+self.bar_offset
                     return (row-self.bar_block_size+self.bar_offset), row+self.bar_offset
                 
                 #Found bar top
+                if self.last_bar_data is not None and abs(self.last_bar_data[0] - (row+self.bar_offset)) > 130:
+                    return self.last_bar_data
+                self.last_bar_data = (row+self.bar_offset, row+self.bar_block_size+self.bar_offset)
                 return row+self.bar_offset, row+self.bar_block_size+self.bar_offset
 
+        if self.last_bar_data is not None:
+            return self.last_bar_data 
         return 0, 0
 
     
