@@ -78,28 +78,35 @@ class object_finder:
         edges  = edges / 255
         col_start = 10
         col_end = 30
+        row_start = 12
         mask = np.ones(col_end-col_start)
+        row = np.where((edges[row_start:,col_start:col_end]==mask).all(axis=1))
+        if row[0].size > 0:
+            row = row[0][0]
+        else:
+            if self.last_bar_data is not None:
+                return self.last_bar_data
+            return (0, 0)
+        
+        if row > self.bar_max_top:
+            if self.last_bar_data is not None and abs(self.last_bar_data[0] - (row-self.bar_block_size+self.bar_offset)) > 130:
+                return self.last_bar_data
 
-        for row in range(12, 520):
-            if np.array_equal(edges[row,col_start:col_end], mask):
-                #pdb.set_trace()
-                #Found bar bottom
-                if row > self.bar_max_top:
-                    if self.last_bar_data is not None and abs(self.last_bar_data[0] - (row-self.bar_block_size+self.bar_offset)) > 130:
-                        return self.last_bar_data
+            self.last_bar_data = (row-self.bar_block_size+self.bar_offset), row+self.bar_offset
+            return (row-self.bar_block_size+self.bar_offset), row+self.bar_offset
+        
+        #Found bar top
+        if row != 0:
+            if self.last_bar_data is not None and abs(self.last_bar_data[0] - (row+self.bar_offset)) > 130:
+                return self.last_bar_data
+            
+            self.last_bar_data = (row+self.bar_offset, row+self.bar_block_size+self.bar_offset)
+            return row+self.bar_offset, row+self.bar_block_size+self.bar_offset
 
-                    self.last_bar_data = (row-self.bar_block_size+self.bar_offset), row+self.bar_offset
-                    return (row-self.bar_block_size+self.bar_offset), row+self.bar_offset
-                
-                #Found bar top
-                if self.last_bar_data is not None and abs(self.last_bar_data[0] - (row+self.bar_offset)) > 130:
-                    return self.last_bar_data
-                self.last_bar_data = (row+self.bar_offset, row+self.bar_block_size+self.bar_offset)
-                return row+self.bar_offset, row+self.bar_block_size+self.bar_offset
-
-        if self.last_bar_data is not None:
-            return self.last_bar_data 
-        return 0, 0
+            if self.last_bar_data is not None:
+                return self.last_bar_data
+        
+        return self.last_bar_data
 
     
     def reshape_data(self, X, y, predictions, rows, flag=0, block_size=0):

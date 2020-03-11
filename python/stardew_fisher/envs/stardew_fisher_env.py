@@ -34,8 +34,8 @@ class StardewFisherEnv(gym.Env):
 
         #Variables related to location and determining if fish being caught
         self.catching = True
-        self.bar_location = (self.bottom - 158, self.bottom - (158 / 2))
-        self.fish_location = self.bottom
+        self.fish_location = 497
+        self.bar_location = (385,543)
 
         #Variables related to timer
         self.start_time = 0
@@ -52,86 +52,76 @@ class StardewFisherEnv(gym.Env):
         self.bar_start_col = 1
         self.bar_end_col = 40
         self.bar_height = 158
-        self.catch_range = self.bar_height / 2
-        
-        if not os.path.isfile('models\\numpy_data\\screen_dims.npy'):
-            self.get_screen_dims()
-            
+        self.catch_range = self.bar_height / 2            
         self.screen_dims = np.load('models\\numpy_data\\screen_dims.npy').tolist()
         #(800, 305, 840, 855)
+        self.last_screen = None
+        self.moving = 0
 
-    def get_screen_dims(self):
-        cv2.imshow('', cv2.imread('models\\image_data\\1.jpg'))
-        x_diff = 40
-        y_diff = 550
-        done = False
+        self.second = False
 
-        while not done:
-            inp = input("Need to get dimensions for where to look for fish. Set zoom to 95%.\nHead to your fishing spot, get a fish to pop up, alt-tab out,\nand then try entering an x,y coordinate for the top left corner of the fishing area (see example).\nWhen done, hit enter in this window to see the capture area.\n")
-            try:
-                start_coord = list(map(int, inp.rstrip('\n').replace(' ', '').split(',')))
-                dims = (start_coord[0], start_coord[1], start_coord[0]+x_diff, start_coord[1]+y_diff)
-                screen = np.array(ImageGrab.grab(bbox=dims)) 
-                screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
-                cv2.imshow('', screen)
-
-                print("Left: {}, Top: {}, Right: {}, Bottom: {}".format(dims[0], dims[1], dims[2], dims[3]))
-                inp = input("Is this a good capture? Should show only fishing bar.\n1 is yes.\n2 is no.\n3 is no, show example image again.\n")
-                if inp == '1':
-                    done = True
-                if inp == '3':
-                    cv2.imshow('', cv2.imread('models\\image_data\\1.jpg'))                    
-            except:
-                print('Input not correct. Try again')
-
-        dims = np.array(dims)
-        np.save('models\\numpy_data\\screen_dims.npy', dims)
-
-                
+        
     def step(self, action):
         assert self.action_space.contains(action)
         #Do action
         if action == 0:
             self.mouse.press(Button.left)
+            self.moving = 1
         elif action == 1:
             pass
         elif action == 2:
             self.mouse.release(Button.left)
+            self.moving = 0
             
         #Get current locations
         self._get_obs()
-        """
-        TODO:
-        Fix caught condition
-        """
-        if self.fish_location > 550 or self.fish_location < 10: #fish caught
-            print(self.fish_location)
+        screen = np.array(ImageGrab.grab(bbox=self.screen_dims)) 
+        screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
+        temp = 1
+        if self.last_screen is not None:
+            temp = np.sum(np.where(screen == self.last_screen, 1, 0)) / screen.size
+        self.last_screen = screen
+        
+        if temp < 0.1 or self.bar_location == (0, 0): #fish caught
+            print('Temp is {}'.format(temp))
             done = True
-            reward = 50000
+            if self.elapsed_time < 0.3:
+                self.catching = False
         else: #fish is somewhere
             done = False
             self._update_time()
-                    
-            #Get reward for not being done
-            reward = self._get_reward()
+
+        obs = self._get_obs()
+        if self.bar_location == (0, 0):
+            done = True
+            if self.elapsed_time < 0.3:
+                self.catching = False
+
+        #Get reward for not being done
+        reward = self._get_reward()
             
-        return self._get_obs(), reward, done, {}
+        return obs, reward, done, {}
 
     def reset(self):
-        self.bar_location = (self.bottom - self.bar_height, self.bottom - (self.bar_height / 2))
-        self.fish_location = self.bottom
         self.catching = True
         self.start_time = time.time()
         self.elapsed_time = 0
-        return self._get_difference()
+        self.fish_location = 497
+        self.bar_location = (385,543)
+        self.finder.last_bar_data = (385,543)
+        self.last_screen = None
+        self.moving = 0
+        return self._get_difference() + (self.observation_space.n - 1) * self.moving
 
     def _get_obs(self):
         #capture the window (wrote script to resize window)
         screen = np.array(ImageGrab.grab(bbox=self.screen_dims)) 
         screen = cv2.cvtColor(screen, cv2.COLOR_BGR2RGB)
+        #if self.second:
+            #pdb.set_trace()
         self.fish_location = self.finder.locate_fish(screen)
         self.bar_location = self.finder.locate_bar(screen)
-
+        
         if self.show_screen:
             #Draw rect around fish
             cv2.rectangle(screen,
@@ -142,13 +132,14 @@ class StardewFisherEnv(gym.Env):
                           (self.bar_start_col, self.bar_location[0]),
                           (self.bar_end_col, self.bar_location[1]), [255, 255, 0], 1)
             cv2.imshow('', screen)
-        
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
         #Return roughly middle of bar
-        return self._get_difference()
+        return self._get_difference() + (self.observation_space.n - 1) * self.moving
 
     def _update_time(self):
-        #pdb.set_trace()
-        if abs(self._get_difference()) > self.catch_range:
+       # pdb.set_trace()
+        if abs(self._get_difference()) >= 75:
             #If was catching and now not, reset timers
             if self.catching:
                 self.catching = False
@@ -171,9 +162,10 @@ class StardewFisherEnv(gym.Env):
 
     #Get difference in two locations
     def _get_difference(self):
-        return self.fish_location - int(self.bar_location[0] + (self.bar_height / 2))
+        return (self.fish_location+14) - int(self.bar_location[0] + (76))
 
     #Get current reward
     def _get_reward(self):
+        self._update_time()
         reward_factor = 1 if self.catching == True else -1
-        return self.elapsed_time * reward_factor
+        return reward_factor
